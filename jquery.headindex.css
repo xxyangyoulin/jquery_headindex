@@ -1,0 +1,47 @@
+.index-box {
+    width: 100%;
+    height: auto;
+    padding: 8px;
+    background-color: transparent;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.index-box ul {
+    padding: 0;
+    list-style: none;
+}
+
+.index-subItem-box{
+    display: none;
+}
+
+.index-item, .index-link {
+    width: 100%;
+    display: block;
+    color: #333333;
+    text-decoration: none;
+}
+
+.index-link {
+    padding: 2px 8px;
+    cursor: pointer;
+    -webkit-transition: background-color 0.2s;
+    -moz-transition: background-color 0.2s;
+    -o-transition: background-color 0.2s;
+    transition: background-color 0.2s;
+}
+
+.index-item.current >.index-link{
+    background-color: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid #333333;
+}
+
+.index-link:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.index-subItem-box .index-item {
+    padding-left: 12px;
+}
+
