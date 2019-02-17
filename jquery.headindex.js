@@ -1,4 +1,4 @@
-;(function ($) {
+;(function ($, window) {
     var headIndex = (function () {
         function headIndex(element, options) {
             this.settings = $.extend(true, $.fn.headIndex.default, options || {});
@@ -8,10 +8,11 @@
 
         headIndex.prototype = {
             init: function () {
-                var articleWrap = $(this.settings.articleWrapSelector);
-                this.headerList = articleWrap.find(':header');
+                this.articleWrap = $(this.settings.articleWrapSelector);
+                this.headerList = this.articleWrap.find(':header');
                 this.indexBox = $(this.settings.indexBoxSelector);
                 this.scrollBody = $(this.settings.scrollSelector);
+                this.scrollWrap = $(this.settings.scrollWrap);
                 this.manual = false;
 
                 if (this.indexBox.length === 0 || this.headerList.length === 0) {
@@ -30,15 +31,12 @@
                     this.headerList[i].h = Number(this.headerList[i].tagName.charAt(1));
                 }
 
-                this.indexTree = [];
-                this.indexHtml = '';
-                this.buildTree();
-                this.buildHtml(this.indexTree);
 
-                if (this.indexHtml) {
-                    var res = '<ul>' + this.indexHtml + '</ul>';
-                    this.indexBox.html(res);
-                }
+                this.tempHtml = [];
+                this.buildHtml(this.buildTree());
+
+                var res = '<ul>' + this.tempHtml.join('') + '</ul>';
+                this.indexBox.html(res);
             },
 
             updateTopHeight: function () {
@@ -96,36 +94,38 @@
                     }
                 });
 
-                //默认第一个为当前
-                var firstItem = this.indexBox.find('.'+this.settings.itemClass).first();
-                this.current(firstItem);
-
-                $(window).scroll(function () {
+                //滑动监听
+                $(this.scrollWrap).scroll(function () {
                     if (that.manual) return;
-
-                    var scrollTop = that.scrollBody.scrollTop();
-                    that.updateTopHeight();
-
-                    var find = that.search(0, that.headerList.length, scrollTop);//
-                    if (!find) {
-                        return;
-                    }
-
-                    var indexItem = that.indexBox.find('a[href="#' + find.id + '"]').parent('li.' + that.settings.itemClass);
-
-                    that.current(indexItem);
-
+                    that.onscroll();
                 });
+
+                //默认选中当前滑动的位置
+                that.onscroll();
+            },
+            onscroll: function () {
+                var scrollTop = this.scrollBody.scrollTop();
+                this.updateTopHeight();
+
+                var find = this.search(0, this.headerList.length - 1, scrollTop);//
+                if (!find) {
+                    return;
+                }
+
+                var indexItem = this.indexBox
+                    .find('a[href="#' + find.id + '"]')
+                    .parent('li.' + this.settings.itemClass);
+
+                this.current(indexItem);
             },
 
             current: function (indexItem) {
                 var subBox,
                     currentClass = 'current';
 
-                if (indexItem.hasClass(currentClass)) {
+                if (indexItem.length === 0 || indexItem.hasClass(currentClass)) {
                     return;
                 }
-
                 //移除其他位置的current类
                 var otherCurrent = this.indexBox.find('li.' + currentClass);
                 if (otherCurrent.length > 0) {
@@ -139,19 +139,16 @@
                 if (subBox.length > 0) {
                     subBox.addClass('open').slideDown();
                 }
-
                 //为了应对非常快速滑动的时候，scroll函数略过父级的box
                 var parentsBox = indexItem.parents('ul.' + this.settings.subItemBoxClass);
                 if (parentsBox.length > 0) {
                     parentsBox.addClass('open').slideDown()
                 }
-
                 //关闭其他位置打开的subItemBox 排除当前父级上的subItemBox
                 subBox = this.indexBox.find('ul.' + this.settings.subItemBoxClass).not('.open');
                 if (subBox.length > 0) {
                     subBox.slideUp()
                 }
-
                 //为当前添加current类
                 indexItem.addClass(currentClass);
             },
@@ -160,86 +157,54 @@
                 if (tree === undefined || tree.length === 0) return;
 
                 for (var i = 0; i < tree.length; i++) {
-                    this.indexHtml += "<li class='" + this.settings.itemClass + "'>"
+                    this.tempHtml.push("<li class='" + this.settings.itemClass + "'>"
                         + "<a class='" + this.settings.linkClass + "' href='#" + tree[i].item.id + "'>"
-                        + tree[i].item.innerText + "</a>";
+                        + tree[i].item.innerText + "</a>");
 
                     if (tree[i].children.length !== 0) {
-                        this.indexHtml += "<ul class='" + this.settings.subItemBoxClass + "'>";
+                        this.tempHtml.push("<ul class='" + this.settings.subItemBoxClass + "'>");
                         this.buildHtml(tree[i].children);
-                        this.indexHtml += "</ul>";
+                        this.tempHtml.push("</ul>");
                     }
-                    this.indexHtml += "</li>"
+                    this.tempHtml.push("</li>")
                 }
             },
 
             buildTree: function () {
-                var current = null;
-                var tempCur;
+                var current = null,
+                    tempCur,
+                    indexTree = [];
+
                 for (var i = 0; i < this.headerList.length; i++) {
                     if (current == null) {
-                        current = {
-                            item: this.headerList[i],
-                            parent: null,
-                            children: [],
-                        };
-                        this.indexTree.push(current);
-
-                    } else {
-                        if (current.item.h < this.headerList[i].h) {
-                            tempCur = {
-                                item: this.headerList[i],
-                                parent: current,
-                                children: [],
-                            };
-                            current.children.push(tempCur);
-                            current = tempCur;
-
-                        } else if (current.item.h === this.headerList[i].h) {
-                            tempCur = {
-                                item: this.headerList[i],
-                                parent: current.parent,
-                                children: [],
-                            };
-                            ((current.parent && current.parent.children) || this.indexTree).push(tempCur);
-                            current = tempCur;
-                        } else {
-
-                            while (current != null && current.item.h > this.headerList[i].h) {
-                                current = current.parent;
-                            }
-
-                            if (current == null) {
-                                current = {
-                                    item: this.headerList[i],
-                                    parent: null,
-                                    children: [],
-                                };
-                                this.indexTree.push(current);
-
-                            } else {
-                                if (current.item.h < this.headerList[i].h) {
-                                    tempCur = {
-                                        item: this.headerList[i],
-                                        parent: current,
-                                        children: [],
-                                    };
-                                    current.children.push(tempCur);
-                                    current = tempCur;
-
-                                } else if (current.item.h === this.headerList[i].h) {
-                                    tempCur = {
-                                        item: this.headerList[i],
-                                        parent: current.parent,
-                                        children: [],
-                                    };
-                                    ((current.parent && current.parent.children) || this.indexTree).push(tempCur);
-                                    current = tempCur;
-                                }
-                            }
-                        }
+                        current = {item: this.headerList[i], parent: null, children: [],};
+                        indexTree.push(current);
+                        continue;
                     }
+                    if (current.item.h < this.headerList[i].h) {
+                        tempCur = {item: this.headerList[i], parent: current, children: [],};
+                        current.children.push(tempCur);
+                        current = tempCur;
+                        continue;
+                    }
+                    if (current.item.h === this.headerList[i].h) {
+                        tempCur = {item: this.headerList[i], parent: current.parent, children: [],};
+                        ((current.parent && current.parent.children) || indexTree).push(tempCur);
+                        current = tempCur;
+                        continue;
+                    }
+                    while (current != null && current.item.h > this.headerList[i].h) {
+                        current = current.parent;
+                    }
+                    if (current == null) {
+                        current = {item: this.headerList[i], parent: null, children: [],};
+                        indexTree.push(current);
+                        continue;
+                    }
+                    i--;
                 }
+
+                return indexTree;
             },
             search: function (start, end, findValue) {
                 if (this.headerList.length === 0) return null;
@@ -266,19 +231,28 @@
             },
 
             offsetTop: function (elem) {
-                var rect, win;
-                if (!elem) {
-                    return;
-                }
-                if (!elem.getClientRects().length) {
-                    return {top: 0, left: 0};
-                }
+                var wrapTop = this.articleWrap[0].getBoundingClientRect().top
+                var eTop = elem.getBoundingClientRect().top
 
-                rect = elem.getBoundingClientRect();
-                win = elem.ownerDocument.defaultView;
-                return parseInt(rect.top + win.pageYOffset);
+                return parseInt(eTop - wrapTop - this.settings.offset)
+                // var rect, win;
+                // if (!elem) {
+                //     return;
+                // }
+                // if (!elem.getClientRects().length) {
+                //     return {top: 0, left: 0};
+                // }
+                //
+                // rect = elem.getBoundingClientRect();
+                // win = elem.ownerDocument.defaultView;
+                // return parseInt(rect.top + win.pageYOffset);
             },
 
+            clean: function () {
+                if (this.element) {
+                    this.element.data("headIndex", null)
+                }
+            }
         };
 
         headIndex.prototype.autoId = 1;
@@ -286,9 +260,6 @@
         return headIndex;
     })();
 
-    //-----------------------------------
-    // 插件一般模板
-    //-----------------------------------
     $.fn.headIndex = function (options) {
         return this.each(function () {
             var $this = $(this),
@@ -299,14 +270,20 @@
             }
             if ($.type(options) === "string") return instance[options]();
         });
-    }
+    };
 
+    //-----------------------------------
+    // 默认参数
+    //-----------------------------------
     $.fn.headIndex.default = {
-        articleWrapSelector: ".article-wrap",
-        indexBoxSelector: ".index-box",
-        scrollSelector: 'body,html',
+        articleWrapSelector: ".article-wrap",/*包裹文章的选择器*/
+        indexBoxSelector: ".index-box",/*包裹目录索引的选择器*/
+        scrollSelector: 'body,html',/*滑动元素的选择器*/
+        scrollWrap: window,/*能够监听到scrollSelector滑动的选择器*/
+
         subItemBoxClass: "index-subItem-box",
         itemClass: "index-item",
         linkClass: "index-link",
+        offset: 0,/*滑动偏移量 按需求进行偏移*/
     }
-})(jQuery);
+})(jQuery, window);

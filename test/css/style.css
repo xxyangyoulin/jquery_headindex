@@ -6,29 +6,67 @@ body {
     display: flex;
     position: relative;
     background-color: #dddddd;
-    padding:  0 10%;
+    padding: 0 10%;
+    overflow-y: auto;
 }
 
 .c-a {
     width: 200px;
     min-width: 200px;
+    height: max-content;
+    max-height: 400px;
     position: sticky;
     position: -webkit-sticky;
-    top: 15px;
-    max-height: 400px;
+    top: 8px;
     overflow: auto;
-    box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2);
     border-radius: 2px;
+    box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2);
     background-color: #e7e7e7;
 }
 
-.c-b{
+.c-b {
     overflow: auto;
     padding: 20px 20px 20px 20px;
     flex: 1;
+    background-color: rgba(255, 227, 196, 0.8);
 }
-.article-wrap{
+
+.c-b-absolute {
+    height: 400px;
+    position: absolute;
+    top: 0;
+    margin-left: 200px;
+}
+
+.article-wrap {
     max-width: 990px;
     margin: 0 auto;
     overflow-y: auto;
+}
+
+
+
+
+
+
+
+
+
+#change-layout {
+    width: max-content;
+    background-color: red;
+    padding: 8px;
+    position: fixed;
+    top: 20px;
+    right: 140px;
+    color: whitesmoke;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 3px rgba(0,0,0,0.2);
+    background-color: rgba(255,0,0,0.5);
+}
+#change-layout:hover{
+    background-color: rgba(255,0,0,0.8);
+    box-shadow: 0 4px 4px rgba(0,0,0,0.2);
+
 }
