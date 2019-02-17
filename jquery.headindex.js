@@ -8,9 +8,9 @@
 
         headIndex.prototype = {
             init: function () {
-                var articleWrap = $(this.settings.articleWrap);
+                var articleWrap = $(this.settings.articleWrapSelector);
                 this.headerList = articleWrap.find(':header');
-                this.indexBox = $(this.settings.indexBox);
+                this.indexBox = $(this.settings.indexBoxSelector);
                 this.scrollBody = $(this.settings.scrollSelector);
                 this.manual = false;
 
@@ -39,7 +39,6 @@
                     var res = '<ul>' + this.indexHtml + '</ul>';
                     this.indexBox.html(res);
                 }
-                // this.indexBox.html(this.indexHtml);
             },
 
             updateTopHeight: function () {
@@ -47,11 +46,13 @@
                 var i;
                 if (length === 0) return;
 
+                //第一个和最后一个标题的高度都没有发生变化，默认整体高度没变
                 if (this.headerList[0].topHeight === this.offsetTop(this.headerList[0])
                     && this.headerList[length - 1].topHeight === this.offsetTop(this.headerList[length - 1])) {
                     return;
                 }
 
+                //第一个和最后一个标题的高度变化的差值相同，默认整体标题的变化差值相同
                 if ((this.headerList[0].topHeight - this.offsetTop(this.headerList[0]))
                     === (this.headerList[length - 1].topHeight - this.offsetTop(this.headerList[length - 1]))) {
 
@@ -62,6 +63,7 @@
                     return;
                 }
 
+                //其他变化，整体进行重新计算和赋值
                 for (i = 0; i < this.headerList.length; i++, this.autoId++) {
                     this.headerList[i].topHeight = this.offsetTop(this.headerList[i]);
                 }
@@ -76,6 +78,7 @@
                         event.preventDefault();
                         var indexItem = target.parent('.' + that.settings.itemClass);
 
+                        //手动点击的时候，屏蔽滑动响应
                         that.manual = true;
                         if (manualValTimer) {
                             clearTimeout(manualValTimer);
@@ -91,8 +94,11 @@
                             scrollTop: that.offsetTop(document.querySelector(event.target.getAttribute('href')))
                         }, 'fast');
                     }
-
                 });
+
+                //默认第一个为当前
+                var firstItem = this.indexBox.find('.'+this.settings.itemClass).first();
+                this.current(firstItem);
 
                 $(window).scroll(function () {
                     if (that.manual) return;
@@ -116,38 +122,38 @@
                 var subBox,
                     currentClass = 'current';
 
-                if (!indexItem.hasClass(currentClass)) {
-                    //移除其他位置的current类
-                    var otherCurrent = this.indexBox.find('li.' + currentClass);
-                    if (otherCurrent.length > 0) {
-                        otherCurrent.removeClass(currentClass);
-                    }
-                    //先清除全部的open标记
-                    this.indexBox.find('ul.open').removeClass('open');
-
-                    //打开当前下级别的subItemBox
-                    subBox = indexItem.children('.' + this.settings.subItemBoxClass);
-                    if (subBox.length > 0) {
-                        subBox.addClass('open').slideDown();
-                    }
-
-                    //为了应对非常快速滑动的时候，scroll函数略过父级的box
-                    var parentsBox = indexItem.parents('ul.' + this.settings.subItemBoxClass);
-                    if (parentsBox.length > 0) {
-                        parentsBox.addClass('open').slideDown()
-                    }
-
-                    //关闭其他位置打开的subItemBox 排除当前父级上的subItemBox
-                    subBox = this.indexBox.find('ul.' + this.settings.subItemBoxClass).not('.open');
-                    if (subBox.length > 0) {
-                        subBox.slideUp()
-                    }
-
-                    //为当前添加current类
-                    indexItem.addClass(currentClass);
-
-
+                if (indexItem.hasClass(currentClass)) {
+                    return;
                 }
+
+                //移除其他位置的current类
+                var otherCurrent = this.indexBox.find('li.' + currentClass);
+                if (otherCurrent.length > 0) {
+                    otherCurrent.removeClass(currentClass);
+                }
+                //先清除全部的open标记
+                this.indexBox.find('ul.open').removeClass('open');
+
+                //打开当前下级别的subItemBox
+                subBox = indexItem.children('.' + this.settings.subItemBoxClass);
+                if (subBox.length > 0) {
+                    subBox.addClass('open').slideDown();
+                }
+
+                //为了应对非常快速滑动的时候，scroll函数略过父级的box
+                var parentsBox = indexItem.parents('ul.' + this.settings.subItemBoxClass);
+                if (parentsBox.length > 0) {
+                    parentsBox.addClass('open').slideDown()
+                }
+
+                //关闭其他位置打开的subItemBox 排除当前父级上的subItemBox
+                subBox = this.indexBox.find('ul.' + this.settings.subItemBoxClass).not('.open');
+                if (subBox.length > 0) {
+                    subBox.slideUp()
+                }
+
+                //为当前添加current类
+                indexItem.addClass(currentClass);
             },
 
             buildHtml: function (tree) {
@@ -166,6 +172,7 @@
                     this.indexHtml += "</li>"
                 }
             },
+
             buildTree: function () {
                 var current = null;
                 var tempCur;
@@ -263,15 +270,10 @@
                 if (!elem) {
                     return;
                 }
-                // Return zeros for disconnected and hidden (display: none) elements (gh-2310)
-                // Support: IE <=11 only
-                // Running getBoundingClientRect on a
-                // disconnected node in IE throws an error
                 if (!elem.getClientRects().length) {
                     return {top: 0, left: 0};
                 }
 
-                // Get document-relative position by adding viewport scroll to viewport-relative gBCR
                 rect = elem.getBoundingClientRect();
                 win = elem.ownerDocument.defaultView;
                 return parseInt(rect.top + win.pageYOffset);
@@ -300,8 +302,8 @@
     }
 
     $.fn.headIndex.default = {
-        articleWrap: ".article-wrap",
-        indexBox: ".index-box",
+        articleWrapSelector: ".article-wrap",
+        indexBoxSelector: ".index-box",
         scrollSelector: 'body,html',
         subItemBoxClass: "index-subItem-box",
         itemClass: "index-item",
