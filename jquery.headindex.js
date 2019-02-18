@@ -31,12 +31,46 @@
                     this.headerList[i].h = Number(this.headerList[i].tagName.charAt(1));
                 }
 
-
                 this.tempHtml = [];
                 this.buildHtml(this.buildTree());
 
                 var res = '<ul>' + this.tempHtml.join('') + '</ul>';
                 this.indexBox.html(res);
+            },
+
+            event: function () {
+                var that = this;
+                var manualValTimer = null;
+                this.indexBox.on('click.headindex', function (event) {
+                    var target = $(event.target);
+                    if (target.hasClass(that.settings.linkClass)) {
+                        event.preventDefault();
+                        var indexItem = target.parent('.' + that.settings.itemClass);
+
+                        //手动点击的时候，屏蔽滑动响应
+                        that.manual = true;
+                        if (manualValTimer) {
+                            clearTimeout(manualValTimer);
+                            manualValTimer = null;
+                        }
+                        manualValTimer = setTimeout(function () {
+                            that.manual = false;
+                        }, 300);
+                        that.current(indexItem);
+
+                        //滚动到当前的标题
+                        that.scrollTo(event.target.getAttribute('href'))
+                    }
+                });
+
+                //滑动监听
+                $(this.scrollWrap).scroll(function () {
+                    if (that.manual) return;
+                    that.updateCurrent();
+                });
+
+                //默认选中当前滑动的位置
+                that.updateCurrent();
             },
 
             updateTopHeight: function () {
@@ -65,58 +99,6 @@
                 for (i = 0; i < this.headerList.length; i++, this.autoId++) {
                     this.headerList[i].topHeight = this.offsetTop(this.headerList[i]);
                 }
-            },
-
-            event: function () {
-                var that = this;
-                var manualValTimer = null;
-                this.indexBox.on('click.headindex', function (event) {
-                    var target = $(event.target);
-                    if (target.hasClass(that.settings.linkClass)) {
-                        event.preventDefault();
-                        var indexItem = target.parent('.' + that.settings.itemClass);
-
-                        //手动点击的时候，屏蔽滑动响应
-                        that.manual = true;
-                        if (manualValTimer) {
-                            clearTimeout(manualValTimer);
-                            manualValTimer = null;
-                        }
-                        manualValTimer = setTimeout(function () {
-                            that.manual = false;
-                        }, 300);
-                        that.current(indexItem);
-
-                        //滚动到当前的标题
-                        that.scrollBody.stop().animate({
-                            scrollTop: that.offsetTop(document.querySelector(event.target.getAttribute('href')))
-                        }, 'fast');
-                    }
-                });
-
-                //滑动监听
-                $(this.scrollWrap).scroll(function () {
-                    if (that.manual) return;
-                    that.onscroll();
-                });
-
-                //默认选中当前滑动的位置
-                that.onscroll();
-            },
-            onscroll: function () {
-                var scrollTop = this.scrollBody.scrollTop();
-                this.updateTopHeight();
-
-                var find = this.search(0, this.headerList.length - 1, scrollTop);//
-                if (!find) {
-                    return;
-                }
-
-                var indexItem = this.indexBox
-                    .find('a[href="#' + find.id + '"]')
-                    .parent('li.' + this.settings.itemClass);
-
-                this.current(indexItem);
             },
 
             current: function (indexItem) {
@@ -247,10 +229,50 @@
                 // win = elem.ownerDocument.defaultView;
                 // return parseInt(rect.top + win.pageYOffset);
             },
+            /**
+             * 滑动到指定id选择器的标题
+             * @param eid 标题的id值
+             */
+            scrollTo: function (eid) {
+                this.scrollBody.stop().animate({
+                    scrollTop: this.offsetTop(document.querySelector(eid))
+                }, 'fast');
+            },
+            /**
+             * 更新当前位置
+             */
+            updateCurrent: function () {
+                var scrollTop = this.scrollBody.scrollTop();
+                this.updateTopHeight();
 
+                var find = this.search(0, this.headerList.length - 1, scrollTop);//
+                if (!find) {
+                    return;
+                }
+
+                var indexItem = this.indexBox
+                    .find('a[href="#' + find.id + '"]')
+                    .parent('li.' + this.settings.itemClass);
+
+                this.current(indexItem);
+            },
+            /**
+             * 清除缓存对象
+             */
             clean: function () {
                 if (this.element) {
                     this.element.data("headIndex", null)
+                }
+            },
+            /**
+             * 临时忽略滚动监听
+             */
+            ignoreScrollEvent: function (ignore) {
+                if (ignore) {
+                    this.manual = true;
+                } else {
+                    this.manual = false;
+                    this.updateCurrent();
                 }
             }
         };
@@ -280,7 +302,6 @@
         indexBoxSelector: ".index-box",/*包裹目录索引的选择器*/
         scrollSelector: 'body,html',/*滑动元素的选择器*/
         scrollWrap: window,/*能够监听到scrollSelector滑动的选择器*/
-
         subItemBoxClass: "index-subItem-box",
         itemClass: "index-item",
         linkClass: "index-link",

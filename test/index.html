@@ -15,12 +15,14 @@
 <div class="c-a">
     <div class="index-box">
     </div>
+    <div id="t"></div>
 </div>
 
 <div class="c-b">
 
     <div class="article-wrap">
         <h1>朱自清散文</h1>
+
         <h2><strong>匆匆</strong></h2>
         <p>燕子去了，有再来的时候；杨柳枯了，有再青的时候；桃花谢了，有再开的时候。但是，聪明的，你告诉我，我们的日子为什么一去不复返呢？——是有人偷了他们罢：那是谁？又藏在何处呢？是他们自己逃走了罢：现在又到了哪里呢？
             　　我不知道他们给了我多少日子；但我的手确乎是渐渐空虚了。在默默里算着，八千多日子已经从我手中溜去；像针尖上一滴水滴在大海里，我的日子滴在时间的流里，没有声音，也没有影子。我不禁头涔涔而泪潸潸了。
@@ -226,7 +228,15 @@
     $(function () {
         $(document).headIndex({
             articleWrap: '.article-wrap',//包裹文章的元素的选择器
-            indexBox: '.index-box',//用来放目录索引的元素的选择器
+            indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
+            scrollSelector: 'body,html',
+            scrollWrap: window,
+            offset: 0,
+        });
+
+        $('body,html').headIndex({
+            articleWrap: '.article-wrap',//包裹文章的元素的选择器
+            indexBoxSelector: '#t',//用来放目录索引的元素的选择器
             scrollSelector: 'body,html',
             scrollWrap: window,
             offset: 0,
