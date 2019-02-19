@@ -12,11 +12,10 @@ step 1. 导入jquery和jquery.headindex
 setp2. 
 ```js
 $(function () {
-    $('.article-wrap').headIndex({
-        articleWrap: '.article-content',//包裹文章的元素的选择器
-        indexBox: '.index-box',//用来放目录索引的元素的选择器
-        //other options
-    })
+    $(document).headIndex({
+                articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
+                indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
+            });
 })
 ```
 

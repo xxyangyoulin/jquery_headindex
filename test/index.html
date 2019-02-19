@@ -227,16 +227,8 @@
 <script>
     $(function () {
         $(document).headIndex({
-            articleWrap: '.article-wrap',//包裹文章的元素的选择器
+            articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
             indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
-            scrollSelector: 'body,html',
-            scrollWrap: window,
-            offset: 0,
-        });
-
-        $('body,html').headIndex({
-            articleWrap: '.article-wrap',//包裹文章的元素的选择器
-            indexBoxSelector: '#t',//用来放目录索引的元素的选择器
             scrollSelector: 'body,html',
             scrollWrap: window,
             offset: 0,
@@ -249,8 +241,8 @@
 
             if ($('.c-b').hasClass('c-b-absolute')) {
                 $(document).headIndex({
-                    articleWrap: '.article-wrap',//包裹文章的元素的选择器
-                    indexBox: '.index-box',//用来放目录索引的元素的选择器
+                    articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
+                    indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
                     scrollSelector: '.c-b',
                     scrollWrap: '.c-b',
                     offset: -12,//滑动定位偏移量
@@ -258,8 +250,8 @@
 
             } else {
                 $(document).headIndex({
-                    articleWrap: '.article-wrap',//包裹文章的元素的选择器
-                    indexBox: '.index-box',//用来放目录索引的元素的选择器
+                    articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
+                    indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
                     scrollSelector: 'body,html',
                     scrollWrap: window,
                     offset: 0,
