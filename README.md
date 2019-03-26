@@ -33,3 +33,12 @@ defaultOptions = {
         offset: 0,/*滑动偏移量 按需求进行偏移*/
 }
 ```
+
+某些布局下，滚动时位置不准确的问题  
+这个需要自己手动适配一下，重写方法：
+```js
+offsetTop: function (elem) {
+    
+
+```
+届时，`offset`可能失效。

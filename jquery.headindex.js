@@ -212,6 +212,12 @@
                 }
             },
 
+            /**
+             * 计算每个标题距离文档顶部的垂直高度，
+             * 为了应对不同需求，如果计算不准确，可以修改这个方法
+             * @param elem
+             * @returns {number}
+             */
             offsetTop: function (elem) {
                 var wrapTop = this.articleWrap[0].getBoundingClientRect().top
                 var eTop = elem.getBoundingClientRect().top
