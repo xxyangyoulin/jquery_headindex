@@ -1,7 +1,7 @@
 # jquery_headindex
 jQuery插件，自动生成文章目录索引，手风琴式折叠显示，自动定位当前位置。  
 
-[查看演示](https://mnnyang.github.io/jquery_headindex/test)
+[查看演示](https://xxyangyoulin.github.io/jquery_headindex/test)
 ## 怎么使用？
 step 1. 导入jquery和jquery.headindex
 ```js
