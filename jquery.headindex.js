@@ -1,22 +1,36 @@
+/*!
+ * jquery_headindex
+ * https://github.com/xxyangyoulin/jquery_headindex
+ */
 ;(function ($, window) {
     var headIndex = (function () {
         function headIndex(element, options) {
-            this.settings = $.extend(true, $.fn.headIndex.default, options || {});
+            this.settings = $.extend({}, $.fn.headIndex.def, options || {});
             this.element = element;
+            console.log(this.settings.hasDynamicEffect);
             this.init();
         }
 
         headIndex.prototype = {
             init: function () {
                 this.articleWrap = $(this.settings.articleWrapSelector);
-                this.headerList = this.articleWrap.find(':header');
+                this.headerList = this.settings.excludeSelector ?
+                    this.articleWrap.find(':header').not(this.settings.excludeSelector)
+                    : this.articleWrap.find(':header');
                 this.indexBox = $(this.settings.indexBoxSelector);
                 this.scrollBody = $(this.settings.scrollSelector);
                 this.scrollWrap = $(this.settings.scrollWrap);
                 this.manual = false;
 
+                /*没有目录的时候隐藏控件*/
+                var $wrap = $(this.settings.indexBoxWrap);
                 if (this.indexBox.length === 0 || this.headerList.length === 0) {
+                    if ($wrap.length > 0) $wrap.hide();
                     return null;
+                }
+                /*有目录的时候，显示控件*/
+                if ($wrap.length > 0 && $wrap.is(':hidden')) {
+                    $wrap.fadeIn();
                 }
 
                 this.initHeader();
@@ -36,10 +50,14 @@
 
                 var res = '<ul>' + this.tempHtml.join('') + '</ul>';
                 this.indexBox.html(res);
+                if (!this.settings.hasDynamicEffect) {
+                    $('.' + this.settings.subItemBoxClass).show();
+                }
             },
 
             event: function () {
-                var that = this;
+                /*TODO */
+                const that = this;
                 var manualValTimer = null;
                 this.indexBox.on('click.headindex', function (event) {
                     var target = $(event.target);
@@ -113,6 +131,13 @@
                 if (otherCurrent.length > 0) {
                     otherCurrent.removeClass(currentClass);
                 }
+                //为当前添加current类
+                indexItem.addClass(currentClass);
+
+                console.log('hasDynamicEffect' + this.settings.hasDynamicEffect)
+                if (!this.settings.hasDynamicEffect) return;
+
+                console.log("被执行")
                 //先清除全部的open标记
                 this.indexBox.find('ul.open').removeClass('open');
 
@@ -131,8 +156,6 @@
                 if (subBox.length > 0) {
                     subBox.slideUp()
                 }
-                //为当前添加current类
-                indexItem.addClass(currentClass);
             },
 
             buildHtml: function (tree) {
@@ -266,8 +289,10 @@
              * 清除缓存对象
              */
             clean: function () {
+                this.indexBox.html('');
                 if (this.element) {
-                    this.element.data("headIndex", null)
+                    this.indexBox.unbind('click.headindex');
+                    this.element.data("headIndex", null);
                 }
             },
             /**
@@ -293,6 +318,7 @@
             var $this = $(this),
                 instance = $this.data("headIndex");
             if (!instance) {
+                console.log("new")
                 instance = new headIndex($this, options);
                 $this.data("headIndex", instance);
             }
@@ -303,14 +329,17 @@
     //-----------------------------------
     // 默认参数
     //-----------------------------------
-    $.fn.headIndex.default = {
+    $.fn.headIndex.def = {
         articleWrapSelector: ".article-wrap",/*包裹文章的选择器*/
         indexBoxSelector: ".index-box",/*包裹目录索引的选择器*/
+        indexBoxWrap: null,/*包裹目录索引的选择器,有目录的时候显示该控件，没有目录的时候隐藏该控件。*/
         scrollSelector: 'body,html',/*滑动元素的选择器*/
         scrollWrap: window,/*能够监听到scrollSelector滑动的选择器*/
+        hasDynamicEffect: true,/*是否有动态手风琴效果*/
+        excludeSelector: null,/*排除标题的选择器*/
+        offset: 0,/*滑动偏移量 按需求进行偏移*/
         subItemBoxClass: "index-subItem-box",
         itemClass: "index-item",
         linkClass: "index-link",
-        offset: 0,/*滑动偏移量 按需求进行偏移*/
     }
 })(jQuery, window);

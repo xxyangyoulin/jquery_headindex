@@ -35,6 +35,7 @@
             　　仿佛一个暮春的早晨，霏霏的毛雨①默然洒在我脸上，引
             　　起润泽，轻松的感觉。新鲜的微风吹动我的衣袂，像爱人的鼻息吹着我的手一样。我立的一条白矾石的甬道上，经了那细雨，正如涂了一层薄薄的乳油；踏着只觉越发滑腻可爱了。 </p>
         <hr/>
+        <h2 class="I-was-excluded">我被排除在目录外了</h2>
         <p>　　①细雨如牛毛，扬州称为“毛雨”。
             　　这是在花园里。群花都还做她们的清梦。那微雨偷偷洗去她们的尘垢，她们的甜软的光泽便自焕发了。在那被洗去的浮艳下，我能看到她们在有日光时所深藏着的恬静的红，冷落的紫，和苦笑的白与绿。以前锦绣般在我眼前的，现有都带了黯淡的颜色。——是愁着芳春的销歇么？是感着芳春的困倦么？
             　　大约也因那濛濛的雨，园里没了秾郁的香气。涓涓的东风只吹来一缕缕饿了似的花香；夹带着些潮湿的草丛的气息和泥土的滋味。园外田亩和沼泽里，又时时送过些新插的秧，少壮的麦，和成荫的柳树的清新的蒸气。这些虽非甜美，却能强烈地刺激我的鼻观，使我有愉快的倦怠之感。
@@ -213,7 +214,7 @@
         <p>&nbsp;</p>
     </div>
 </div>
-<a href="https://github.com/mnnyang/jquery_headindex" style="position: fixed;top: 0;right: 0;">
+<a href="https://github.com/xxyangyoulin/jquery_headindex" style="position: fixed;top: 0;right: 0;">
     <img width="149" height="149"
          src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149"
          class="attachment-full size-full" alt="Fork me on GitHub"
@@ -229,9 +230,7 @@
         $(document).headIndex({
             articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
             indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
-            scrollSelector: 'body,html',
-            scrollWrap: window,
-            offset: 0,
+            excludeSelector: '.I-was-excluded',
         });
 
         $('#change-layout').on('click', function () {
@@ -243,6 +242,8 @@
                 $(document).headIndex({
                     articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
                     indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
+                    hasDynamicEffect: false,/*动态手风琴效果*/
+                    excludeSelector: '.I-was-excluded',
                     scrollSelector: '.c-b',
                     scrollWrap: '.c-b',
                     offset: -12,//滑动定位偏移量
@@ -252,9 +253,8 @@
                 $(document).headIndex({
                     articleWrapSelector: '.article-wrap',//包裹文章的元素的选择器
                     indexBoxSelector: '.index-box',//用来放目录索引的元素的选择器
-                    scrollSelector: 'body,html',
-                    scrollWrap: window,
-                    offset: 0,
+                    excludeSelector: '.I-was-excluded',
+                    hasDynamicEffect: true,/*动态手风琴效果*/
                 });
             }
         })
