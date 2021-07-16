@@ -242,21 +242,13 @@
              * @returns {number}
              */
             offsetTop: function (elem) {
-                var wrapTop = this.articleWrap[0].getBoundingClientRect().top
-                var eTop = elem.getBoundingClientRect().top
+                // var wrapTop = this.articleWrap[0].getBoundingClientRect().top
+                // var eTop = elem.getBoundingClientRect().top
+                // return parseInt(eTop - wrapTop - this.settings.offset)
 
-                return parseInt(eTop - wrapTop - this.settings.offset)
-                // var rect, win;
-                // if (!elem) {
-                //     return;
-                // }
-                // if (!elem.getClientRects().length) {
-                //     return {top: 0, left: 0};
-                // }
-                //
-                // rect = elem.getBoundingClientRect();
-                // win = elem.ownerDocument.defaultView;
-                // return parseInt(rect.top + win.pageYOffset);
+                //一般情况只需要返回 elem.offsetTop 即可。
+                // 如果遇到定位错误情况，可以尝试替换为上面注释掉的代码
+                return elem.offsetTop
             },
             /**
              * 滑动到指定id选择器的标题
