@@ -7,7 +7,6 @@
         function headIndex(element, options) {
             this.settings = $.extend({}, $.fn.headIndex.def, options || {});
             this.element = element;
-            console.log(this.settings.hasDynamicEffect);
             this.init();
         }
 
@@ -26,6 +25,7 @@
                 var $wrap = $(this.settings.indexBoxWrap);
                 if (this.indexBox.length === 0 || this.headerList.length === 0) {
                     if ($wrap.length > 0) $wrap.hide();
+                    this.settings.onHide();
                     return null;
                 }
                 /*有目录的时候，显示控件*/
@@ -81,12 +81,12 @@
                     }
                 });
 
-                //滑动监听
-                $(this.scrollWrap).scroll(function () {
+                this.scrollEventFun = function () {
                     if (that.manual) return;
                     that.updateCurrent();
-                });
-
+                }
+                //滑动监听
+                $(this.scrollWrap).scroll(this.scrollEventFun);
                 //默认选中当前滑动的位置
                 that.updateCurrent();
             },
@@ -134,10 +134,8 @@
                 //为当前添加current类
                 indexItem.addClass(currentClass);
 
-                console.log('hasDynamicEffect' + this.settings.hasDynamicEffect)
                 if (!this.settings.hasDynamicEffect) return;
 
-                console.log("被执行")
                 //先清除全部的open标记
                 this.indexBox.find('ul.open').removeClass('open');
 
@@ -284,6 +282,7 @@
                 this.indexBox.html('');
                 if (this.element) {
                     this.indexBox.unbind('click.headindex');
+                    $(this.scrollWrap).unbind('scroll', this.scrollEventFun);//unbind old event
                     this.element.data("headIndex", null);
                 }
             },
@@ -310,7 +309,6 @@
             var $this = $(this),
                 instance = $this.data("headIndex");
             if (!instance) {
-                console.log("new")
                 instance = new headIndex($this, options);
                 $this.data("headIndex", instance);
             }
@@ -333,5 +331,8 @@
         subItemBoxClass: "index-subItem-box",
         itemClass: "index-item",
         linkClass: "index-link",
+        onHide: function () {
+            //文章没有标题目录的时候，去做某些事情
+        }
     }
 })(jQuery, window);
