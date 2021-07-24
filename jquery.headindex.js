@@ -246,7 +246,8 @@
 
                 //一般情况只需要返回 elem.offsetTop 即可。
                 // 如果遇到定位错误情况，可以尝试替换为上面注释掉的代码
-                return elem.offsetTop
+                // return elem.offsetTop
+                return elem.offsetTop - this.settings.offset
             },
             /**
              * 滑动到指定id选择器的标题
